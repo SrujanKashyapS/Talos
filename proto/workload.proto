@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package talos.v1;
+
+option go_package = "github.com/SrujanKashyapS/Talos/internal/rpc";
+
+// This file documents the control-plane RPC contract. The project currently
+// uses a JSON gRPC codec and hand-written Go request types in internal/rpc.
+message Empty {}
+message ApplyWorkloadRequest { bytes spec = 1; }
+message ScaleRequest { string name = 1; int32 replicas = 2; }
+message DeleteWorkloadRequest { string name = 1; }
+message WorkloadStatus { string name = 1; string image = 2; int32 desired = 3; int32 running = 4; }
+message WorkloadList { repeated WorkloadStatus items = 1; }
+message NodeInfo { string id = 1; string address = 2; double cpu_capacity = 3; double cpu_used = 4; int64 memory_capacity = 5; int64 memory_used = 6; int32 containers = 7; repeated string held_layers = 8; int64 last_heartbeat = 9; bool alive = 10; int32 missed = 11; }
+message NodeList { repeated NodeInfo nodes = 1; }
+message LogsRequest { string name = 1; int32 replica = 2; }
+message LogsReply { bytes data = 1; }
+
+service Control {
+  rpc ApplyWorkload(ApplyWorkloadRequest) returns (Empty);
+  rpc ScaleWorkload(ScaleRequest) returns (Empty);
+  rpc DeleteWorkload(DeleteWorkloadRequest) returns (Empty);
+  rpc ListWorkloads(Empty) returns (WorkloadList);
+  rpc ListControlNodes(Empty) returns (NodeList);
+  rpc GetWorkloadLogs(LogsRequest) returns (LogsReply);
+}

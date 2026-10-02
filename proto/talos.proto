@@ -1,0 +1,29 @@
+syntax = "proto3";
+package talos.v1;
+option go_package = "github.com/SrujanKashyapS/Talos/internal/rpc";
+
+message Empty {}
+message Digest { string digest = 1; }
+message BoolReply { bool ok = 1; }
+message LayerChunk { string digest = 1; bytes data = 2; bool final = 3; uint64 total = 4; }
+message ManifestRequest { string name = 1; string tag = 2; }
+message ManifestEnvelope { bytes json = 1; }
+message ContainerRequest { string id = 1; string image_name = 2; string image_tag = 3; repeated string command = 4; repeated string env = 5; string workload = 6; int32 replica = 7; }
+message ContainerReply { string id = 1; string status = 2; int32 pid = 3; }
+message ContainerInfo { string id = 1; string status = 2; int32 pid = 3; string image = 4; string workload = 5; int32 replica = 6; int32 exit_code = 7; }
+message ContainerList { repeated ContainerInfo items = 1; }
+message LogReply { bytes data = 1; }
+
+service Registry {
+  rpc HasLayer(Digest) returns (BoolReply);
+  rpc GetLayer(Digest) returns (stream LayerChunk);
+  rpc PutLayer(stream LayerChunk) returns (BoolReply);
+  rpc GetManifest(ManifestRequest) returns (ManifestEnvelope);
+  rpc PutManifest(ManifestEnvelope) returns (BoolReply);
+}
+service Agent {
+  rpc RunContainer(ContainerRequest) returns (ContainerReply);
+  rpc StopContainer(ContainerRequest) returns (Empty);
+  rpc ListContainers(Empty) returns (ContainerList);
+  rpc GetLogs(ContainerRequest) returns (LogReply);
+}

@@ -1,0 +1,12 @@
+name: demo
+image: demo:latest
+replicas: 3
+env:
+  - MESSAGE=hello
+resources:
+  request:
+    cpu: 100m
+    memory: 32Mi
+  limit:
+    cpu: 500m
+    memory: 128Mi
